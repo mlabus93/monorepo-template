@@ -30,8 +30,17 @@ Run these from the repository root:
 
 - `pnpm build`: type-check and build the apps into their respective `dist/` directories through Turbo.
 - `pnpm lint`: run workspace ESLint checks through Turbo.
-- `pnpm --filter @repo/ui check-types`: type-check the shared UI package.
+- `pnpm check-types`: type-check both apps, their Vite/Vitest configurations, and the shared UI package.
 - `pnpm format`: format TypeScript and Markdown files with Prettier.
+- `pnpm format:check`: check formatting without modifying files.
+
+## Continuous integration
+
+[GitHub Actions](.github/workflows/ci.yml) runs on every pull request, pushes to `main`, merge queue updates, and manual dispatches. Five independent checks verify lint, formatting, TypeScript, production builds, and tests with merged coverage. Installs use the frozen pnpm lockfile and the minimum supported Node.js version (24.20.0); update the workflow when changing the Node.js minimum in `package.json`. pnpm's version is read from `package.json`.
+
+The test job uploads a `coverage` artifact containing the HTML coverage report and workspace blob reports, retained for 14 days. Failed tests fail CI; coverage is reported without a minimum percentage gate. Dependency downloads are cached, and newer commits cancel obsolete runs. Dependabot proposes weekly GitHub Actions updates.
+
+To enforce these checks before merging, configure a branch ruleset or branch protection rule for `main` in GitHub repository settings: require pull requests, require the **CI passed** status check, and require branches to be up to date before merging (or use a merge queue). Run the workflow once so GitHub can offer the check in settings. `CI passed` fails if any check fails or is cancelled/skipped. The workflow alone does not prevent merging; the repository rule must be enabled separately. If your default branch has another name, update the workflow's push filter and protect that branch instead.
 
 ## Testing
 
