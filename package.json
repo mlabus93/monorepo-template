@@ -1,0 +1,30 @@
+{
+  "name": "monorepo-template",
+  "description": "Reusable React, Vite, and Turborepo project template",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "pretest": "node packages/vitest-config/scripts/clean-blob-reports.mjs",
+    "test": "turbo run test",
+    "test:projects": "vitest run",
+    "test:projects:watch": "vitest --watch",
+    "report": "pnpm test && pnpm --filter @repo/vitest-config report",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "jsdom": "catalog:",
+    "prettier": "^3.9.6",
+    "turbo": "^2.10.12",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.20.0"
+  },
+  "packageManager": "pnpm@12.1.0"
+}

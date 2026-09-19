@@ -1,0 +1,12 @@
+.DS_Store
+node_modules
+.turbo
+*.log
+dist
+dist-ssr
+coverage
+*.local
+.env
+.cache
+server/dist
+public/dist

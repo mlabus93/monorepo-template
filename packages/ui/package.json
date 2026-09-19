@@ -1,0 +1,34 @@
+{
+  "name": "@repo/ui",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./counter": "./components/counter.tsx",
+    "./header": "./components/header.tsx"
+  },
+  "license": "MIT",
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint \"**/*.{ts,tsx}\"",
+    "test": "vitest run --coverage --coverage.reporter=text --reporter=default --reporter=blob --outputFile.blob=coverage/blob/report.json",
+    "test:watch": "vitest --watch"
+  },
+  "dependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@repo/vitest-config": "workspace:*",
+    "@testing-library/react": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "jsdom": "catalog:",
+    "vitest": "catalog:",
+    "typescript": "catalog:"
+  }
+}
