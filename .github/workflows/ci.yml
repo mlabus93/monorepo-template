@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Lint
+            script: lint
+          - name: Formatting
+            script: format:check
+          - name: Types
+            script: check-types
+          - name: Build
+            script: build
+          - name: Tests and coverage
+            script: report
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          # Test the minimum supported Node.js version from package.json.
+          node-version: "24.20.0"
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ${{ matrix.name }}
+        run: pnpm run "$CHECK_SCRIPT"
+        env:
+          CHECK_SCRIPT: ${{ matrix.script }}
+
+      - name: Upload coverage and test reports
+        if: ${{ !cancelled() && matrix.script == 'report' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: |
+            packages/vitest-config/coverage/report/
+            apps/*/coverage/blob/
+            packages/*/coverage/blob/
+          if-no-files-found: warn
+          retention-days: 14
+
+  required:
+    name: CI passed
+    if: ${{ always() }}
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every check to succeed
+        run: test "$CHECKS_RESULT" = success
+        env:
+          CHECKS_RESULT: ${{ needs.checks.result }}

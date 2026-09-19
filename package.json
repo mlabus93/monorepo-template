@@ -7,12 +7,14 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "check-types": "turbo run check-types",
     "pretest": "node packages/vitest-config/scripts/clean-blob-reports.mjs",
     "test": "turbo run test",
     "test:projects": "vitest run",
     "test:projects:watch": "vitest --watch",
     "report": "pnpm test && pnpm --filter @repo/vitest-config report",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
     "@vitest/coverage-v8": "catalog:",

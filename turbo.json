@@ -9,6 +9,9 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
     "test": {
       "dependsOn": ["transit"],
       "outputs": ["coverage/blob/**"]
