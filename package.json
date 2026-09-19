@@ -13,13 +13,17 @@
     "test:projects": "vitest run",
     "test:projects:watch": "vitest --watch",
     "report": "pnpm test && pnpm --filter @repo/vitest-config report",
+    "prepare": "husky",
+    "lint-staged": "lint-staged",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
     "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
+    "husky": "^9.1.7",
     "jsdom": "catalog:",
+    "lint-staged": "^17.5.1",
     "prettier": "^3.9.6",
     "turbo": "^2.10.12",
     "typescript": "catalog:",

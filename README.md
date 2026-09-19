@@ -31,8 +31,11 @@ Run these from the repository root:
 - `pnpm build`: type-check and build the apps into their respective `dist/` directories through Turbo.
 - `pnpm lint`: run workspace ESLint checks through Turbo.
 - `pnpm check-types`: type-check both apps, their Vite/Vitest configurations, and the shared UI package.
+- `pnpm lint-staged`: fix supported staged files with ESLint and Prettier.
 - `pnpm format`: format TypeScript and Markdown files with Prettier.
 - `pnpm format:check`: check formatting without modifying files.
+
+Husky runs `pnpm lint-staged` before each commit. Each linted workspace has an explicit lint-staged config that fixes its staged code with ESLint and Prettier; the root config formats other supported staged files.
 
 ## Continuous integration
 
