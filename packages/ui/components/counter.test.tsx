@@ -10,3 +10,10 @@ test("increments the counter when clicked", () => {
   fireEvent.click(counter);
   expect(counter.textContent).toBe("1");
 });
+
+test("starts with a clean DOM and a fresh counter in the next test", () => {
+  expect(screen.queryByRole("button")).toBeNull();
+
+  render(<Counter />);
+  expect(screen.getByRole("button").textContent).toBe("0");
+});

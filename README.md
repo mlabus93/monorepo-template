@@ -29,13 +29,24 @@ Both apps currently display starter screens with a shared heading and counter. A
 Run these from the repository root:
 
 - `pnpm build`: type-check and build the apps into their respective `dist/` directories through Turbo.
-- `pnpm lint`: run workspace ESLint checks through Turbo.
+- `pnpm lint`: lint application code, workspace packages, and root configuration with ESLint. Each app and the UI package also supports a filtered `lint` command.
 - `pnpm check-types`: type-check both apps, their Vite/Vitest configurations, and the shared UI package.
 - `pnpm lint-staged`: fix supported staged files with ESLint and Prettier.
-- `pnpm format`: format TypeScript and Markdown files with Prettier.
+- `pnpm format`: format all supported source, configuration, and documentation files with Prettier, excluding generated output and the lockfile via `.prettierignore`.
 - `pnpm format:check`: check formatting without modifying files.
+- `pnpm check`: run lint, formatting checks, type checks, production builds, and tests with merged coverage, stopping at the first failure. This runs the same checks as CI.
 
-Husky runs `pnpm lint-staged` before each commit. Each linted workspace has an explicit lint-staged config that fixes its staged code with ESLint and Prettier; the root config formats other supported staged files.
+Husky runs `pnpm lint-staged` before each commit. Root and workspace lint-staged configurations fix staged JavaScript and TypeScript with ESLint and Prettier, and format other supported files with Prettier. The root command uses `--cwd=.` to run every task from the repository root, so the hook and full formatting command share `.prettierignore` even for files selected by a workspace configuration.
+
+## Environment variables
+
+Keep app-specific environment files inside their app directory, such as `apps/web/.env.local`. Environment files matching `.env*` are ignored by Git, except `.env.example` and `.env.*.example`. When introducing variables, commit an example file with placeholder values and document what each variable controls; copy it to an ignored environment file for local use.
+
+Vite exposes variables prefixed with `VITE_` to browser code, so these values must be safe to make public. Keep secrets in server-side systems. No environment file is required by the starter apps.
+
+The build task includes `.env*` files in its cache inputs. Turbo infers `VITE_*` variables for Vite apps; declare any additional environment variables that affect task output in the relevant task's `env` configuration in `turbo.json`.
+
+All workspace packages are private by default. Remove `private` and add an explicit publishing setup only when a package is intended for distribution.
 
 ## Continuous integration
 

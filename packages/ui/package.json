@@ -10,7 +10,7 @@
   "license": "MIT",
   "scripts": {
     "check-types": "tsc --noEmit",
-    "lint": "eslint \"**/*.{ts,tsx}\"",
+    "lint": "eslint .",
     "test": "vitest run --coverage --coverage.reporter=text --reporter=default --reporter=blob --outputFile.blob=coverage/blob/report.json",
     "test:watch": "vitest --watch"
   },
@@ -30,5 +30,6 @@
     "jsdom": "catalog:",
     "vitest": "catalog:",
     "typescript": "catalog:"
-  }
+  },
+  "private": true
 }
