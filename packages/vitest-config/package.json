@@ -7,11 +7,11 @@
   "exports": {
     ".": {
       "types": "./index.d.ts",
-      "default": "./index.mjs"
+      "default": "./index.js"
     }
   },
   "scripts": {
-    "report": "node scripts/merge-blob-reports.mjs && vitest run --root ../.. --merge-reports coverage/merged-blob --passWithNoTests --coverage --coverage.provider=v8 --coverage.reporter=html --coverage.reporter=text --coverage.reportsDirectory=packages/vitest-config/coverage/report"
+    "report": "node scripts/merge-blob-reports.js && vitest run --root ../.. --merge-reports coverage/merged-blob --passWithNoTests --coverage --coverage.provider=v8 --coverage.reporter=html --coverage.reporter=text --coverage.reportsDirectory=packages/vitest-config/coverage/report"
   },
   "dependencies": {
     "vitest": "catalog:"
