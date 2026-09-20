@@ -4,7 +4,9 @@ This package provides shared Vitest defaults and combines test and coverage resu
 
 ## Shared project configuration
 
-`sharedProjectConfig` sets `environment: "jsdom"` for DOM-based tests and `restoreMocks: true` to restore spied-on implementations before each test. Each workspace imports these defaults and supplies a unique project name:
+`sharedProjectConfig` sets `environment: "jsdom"` for DOM-based tests and `restoreMocks: true` to restore spied-on implementations before each test. Its shared [setup file](setup.js) explicitly registers React Testing Library's `cleanup` with Vitest's `afterEach`, so components mounted with Testing Library are unmounted between tests without enabling Vitest globals. Roots created directly with React's `createRoot` still need their own teardown when reused within a test file.
+
+The setup file is resolved relative to this package, so it works in both workspace and root project runs. React and React DOM are peer dependencies; consumers should use the workspace catalog versions. When adding workspace-specific setup files, preserve the shared `setupFiles` entry. Each workspace imports these defaults and supplies a unique project name:
 
 ```ts
 import { sharedProjectConfig } from "@repo/vitest-config";

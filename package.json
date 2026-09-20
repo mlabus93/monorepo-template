@@ -6,7 +6,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
+    "lint": "eslint .",
     "check-types": "turbo run check-types",
     "pretest": "node packages/vitest-config/scripts/clean-blob-reports.js",
     "test": "turbo run test",
@@ -14,9 +14,10 @@
     "test:projects:watch": "vitest --watch",
     "report": "pnpm test && pnpm --filter @repo/vitest-config report",
     "prepare": "husky",
-    "lint-staged": "lint-staged",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,md}\""
+    "lint-staged": "lint-staged --cwd=.",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm lint && pnpm format:check && pnpm check-types && pnpm build && pnpm report"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "catalog:",
@@ -27,7 +28,8 @@
     "prettier": "^3.9.6",
     "turbo": "^2.10.12",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@repo/eslint-config": "workspace:*"
   },
   "engines": {
     "node": ">=24.20.0"

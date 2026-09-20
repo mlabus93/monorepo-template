@@ -14,9 +14,14 @@
     "report": "node scripts/merge-blob-reports.js && vitest run --root ../.. --merge-reports coverage/merged-blob --passWithNoTests --coverage --coverage.provider=v8 --coverage.reporter=html --coverage.reporter=text --coverage.reportsDirectory=packages/vitest-config/coverage/report"
   },
   "dependencies": {
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@testing-library/react": "catalog:"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }
