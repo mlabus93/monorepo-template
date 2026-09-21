@@ -13,7 +13,13 @@ Consumers can import from the package root:
 import { Counter, Header } from "@repo/ui";
 ```
 
-The component-specific paths `@repo/ui/counter` and `@repo/ui/header` are also exported. All exports point directly to TypeScript source, which the consuming app processes; this package has no separate build step or compiled distribution.
+The component-specific paths `@repo/ui/counter` and `@repo/ui/header` are also exported. All exports point directly to TypeScript source under `src`, which the consuming app processes; this package has no separate build step or compiled distribution.
+
+## Source and configuration
+
+`src/index.ts` is the package entry point. Components and their tests live in `src/components`, and `src/test-env.d.ts` supplies DOM matcher types. ESLint and Vitest configuration files stay at the package root.
+
+`tsconfig.json` checks `src` using the shared React library preset. `tsconfig.node.json` checks `vitest.config.ts` with Node settings, matching the apps' separation of source and tooling. The `check-types` command runs both configurations.
 
 ## Common commands
 
