@@ -58,6 +58,8 @@ To enforce these checks before merging, configure a branch ruleset or branch pro
 
 ## Testing
 
+Tests use React Testing Library to render and query components, `@testing-library/user-event` for interactions, and `@testing-library/jest-dom` for DOM assertions. The shared Vitest setup registers matchers and cleans up rendered components between tests.
+
 - `pnpm test` runs the `web`, `docs`, and `ui` suites through Turborepo, reusing cached results when inputs are unchanged. Each workspace writes a blob report and prints coverage to the terminal.
 - `pnpm test:projects` runs all suites once through the root Vitest Projects configuration.
 - `pnpm test:projects:watch` watches all projects in one Vitest process.

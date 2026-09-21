@@ -23,6 +23,14 @@ export default defineProject({
 
 Keep both object spreads: assigning a new `test` object replaces the shared one unless its settings are spread into it. The [root Vitest configuration](../../vitest.config.ts) references the `web`, `docs`, and `ui` project files, so direct project runs and report merging use the same project definitions.
 
+## DOM assertions and user interactions
+
+The shared setup imports `@testing-library/jest-dom/vitest`, making DOM matchers such as `toBeInTheDocument` and `toHaveTextContent` available to every test. Each testable workspace includes a `src/test-env.d.ts` file importing the same entry point so TypeScript recognizes the matchers within its source include paths. Vitest globals remain disabled.
+
+Use `@testing-library/user-event` for user interactions. Create a fresh instance with `userEvent.setup()` inside each test before rendering, then await interactions such as `user.click(button)` and `user.type(input, "hello")`. The starter tests demonstrate this alongside DOM assertions. React Testing Library's `fireEvent` remains available for low-level events when needed.
+
+When adding a workspace, include `@testing-library/jest-dom` and `@testing-library/user-event` as development dependencies using the catalog, and add the matcher declaration file within its TypeScript include paths.
+
 ## Why merging is needed with Turborepo
 
 The root `pnpm test` command delegates to `turbo run test`. Each testable workspace runs its own Vitest process, which lets Turbo cache and restore results separately. For example, after a change isolated to `web`, Turbo can rerun its tests while reusing the `docs` and `ui` results, provided their inputs and dependencies are unchanged.
