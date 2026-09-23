@@ -14,7 +14,7 @@
     "test:projects:watch": "vitest --watch",
     "report": "pnpm test && pnpm --filter @repo/vitest-config report",
     "prepare": "husky",
-    "lint-staged": "lint-staged --cwd=.",
+    "lint-staged": "lint-staged",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm lint && pnpm format:check && pnpm check-types && pnpm build && pnpm report"
