@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, test } from "vitest";
 
-import { Counter } from "./counter";
+import { Counter } from "./Counter";
 
 test("increments the counter when clicked", async () => {
   const user = userEvent.setup();

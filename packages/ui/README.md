@@ -13,7 +13,7 @@ Consumers can import from the package root:
 import { Counter, Header } from "@repo/ui";
 ```
 
-The component-specific paths `@repo/ui/counter` and `@repo/ui/header` are also exported. All exports point directly to TypeScript source under `src`, which the consuming app processes; this package has no separate build step or compiled distribution.
+The component-specific paths `@repo/ui/Counter` and `@repo/ui/Header` are also exported. All exports point directly to TypeScript source under `src`, which the consuming app processes; this package has no separate build step or compiled distribution.
 
 ## Source and configuration
 
