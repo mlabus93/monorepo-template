@@ -4,8 +4,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./counter": "./src/components/counter.tsx",
-    "./header": "./src/components/header.tsx"
+    "./Counter": "./src/components/Counter.tsx",
+    "./Header": "./src/components/Header.tsx"
   },
   "license": "MIT",
   "scripts": {
