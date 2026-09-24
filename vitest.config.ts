@@ -1,6 +1,8 @@
 import { defineConfig } from "vitest/config";
 import {
   coverageExclude,
+  coverageThresholds,
+  mergedReportsDirectory,
   sourceCoveragePattern,
 } from "./packages/vitest-config/index.ts";
 
@@ -13,15 +15,11 @@ export default defineConfig({
         `packages/*/${sourceCoveragePattern}`,
       ],
       exclude: coverageExclude,
-      // Aggregate baseline, verified against the merged workspace blobs.
-      thresholds: {
-        statements: 80,
-        lines: 80,
-        functions: 80,
-        branches: 75,
-      },
+      // Workspace runs enforce these per workspace. Rechecking the merged total
+      // also counts source from workspaces that have no tests at all.
+      thresholds: coverageThresholds,
       reporter: ["text", "html", "json-summary"],
-      reportsDirectory: "packages/vitest-config/coverage/report",
+      reportsDirectory: mergedReportsDirectory,
     },
     projects: [
       "./apps/web/vitest.config.ts",

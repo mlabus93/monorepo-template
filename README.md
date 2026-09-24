@@ -52,7 +52,7 @@ All workspace packages are private by default. Remove `private` and add an expli
 
 [GitHub Actions](.github/workflows/ci.yml) runs on every pull request, pushes to `main`, merge queue updates, and manual dispatches. Five independent checks verify lint, formatting, TypeScript, production builds, and tests with merged coverage. Installs use the frozen pnpm lockfile and the minimum supported Node.js version (24.20.0); update the workflow when changing the Node.js minimum in `package.json`. pnpm's version is read from `package.json`.
 
-The test job uploads a `coverage` artifact containing the HTML coverage report and workspace blob reports, retained for 14 days. Failed tests or aggregate coverage below 80% of statements, lines, and functions or 75% of branches fail CI. Dependency downloads are cached, and newer commits cancel obsolete runs. Dependabot proposes weekly GitHub Actions updates.
+The test job uploads a `coverage` artifact containing the HTML coverage report and workspace blob reports, retained for 14 days. Failed tests, or coverage below 80% of statements, lines, and functions or 75% of branches in any workspace or in the merged total, fail CI. Dependency downloads are cached, and newer commits cancel obsolete runs. Dependabot proposes weekly GitHub Actions updates.
 
 To enforce these checks before merging, configure a branch ruleset or branch protection rule for `main` in GitHub repository settings: require pull requests, require the **CI passed** status check, and require branches to be up to date before merging (or use a merge queue). Run the workflow once so GitHub can offer the check in settings. `CI passed` fails if any check fails or is cancelled/skipped. The workflow alone does not prevent merging; the repository rule must be enabled separately. If your default branch has another name, update the workflow's push filter and protect that branch instead.
 
@@ -67,6 +67,6 @@ Tests use React Testing Library to render and query components, `@testing-librar
 
 The `test:projects` commands run tests without Turbo caching or coverage. Use `pnpm report` for coverage.
 
-The coverage report includes application and shared-package source, including untested files. `src/main.*` entry points, which only mount the app, are excluded, as are declarations, tests, test support directories, and Vitest's default exclusions. Shared components receive coverage from app tests as well as their own tests. HTML and `coverage-summary.json` reports are written to `packages/vitest-config/coverage/report/`.
+The coverage report includes application and shared-package source, including untested files. `src/main.*` entry points, which only mount the app, are excluded, as are declarations, tests, test support directories, and Vitest's default exclusions. Each workspace is measured only by its own tests, so shared components need tests in their package. HTML and `coverage-summary.json` reports are written to `packages/vitest-config/coverage/report/`.
 
 Each testable workspace's `vitest.config.ts` defines that test project; the root configuration references those files directly. See the [Vitest package overview](packages/vitest-config/README.md) for the caching and report-merging workflow and instructions for adding a test project.

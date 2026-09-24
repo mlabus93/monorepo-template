@@ -13,6 +13,19 @@ export const coverageExclude = [
   "**/src/main.{js,jsx,ts,tsx}",
 ];
 
+// Every workspace must meet these on its own; the merged report reuses them.
+export const coverageThresholds = {
+  statements: 80,
+  lines: 80,
+  functions: 80,
+  branches: 75,
+};
+
+// Resolved from this package so it is correct from any Vitest root.
+export const mergedReportsDirectory = fileURLToPath(
+  new URL("./coverage/report", import.meta.url),
+);
+
 export const sharedProjectConfig = {
   test: {
     environment: "jsdom",
@@ -20,11 +33,11 @@ export const sharedProjectConfig = {
     setupFiles: [fileURLToPath(new URL("./setup.ts", import.meta.url))],
     coverage: {
       provider: "v8",
-      // Discover untested source within this workspace and retain imported
-      // sibling source. Each package contributes its own untested files.
-      include: [`**/${sourceCoveragePattern}`],
-      allowExternal: true,
+      // Measure only this workspace's source, including untested files.
+      // Sibling packages must be covered by their own tests.
+      include: [sourceCoveragePattern],
       exclude: coverageExclude,
+      thresholds: coverageThresholds,
     },
   },
 } satisfies ViteUserConfig;
