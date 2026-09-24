@@ -1,14 +1,14 @@
-const eslint = require("@eslint/js");
-const { defineConfig } = require("eslint/config");
-const eslintConfigPrettier = require("eslint-config-prettier");
-const globals = require("globals");
-const reactHooks = require("eslint-plugin-react-hooks");
+import eslint from "@eslint/js";
+import { defineConfig } from "eslint/config";
+import eslintConfigPrettier from "eslint-config-prettier";
+import globals from "globals";
+import reactHooks from "eslint-plugin-react-hooks";
 // TypeScript 7 has no compiler API yet, so this package aliases `typescript`
 // to `@typescript/typescript6` for typescript-eslint. Editors and builds use TS 7.
-const tseslint = require("typescript-eslint");
+import tseslint from "typescript-eslint";
 
 // Matching sections combine in order; later settings override earlier ones.
-module.exports = defineConfig(
+export default defineConfig(
   // An ignores-only section excludes generated output and dependencies globally.
   // Recursive patterns work from both the root and workspace configurations.
   {
@@ -69,12 +69,6 @@ module.exports = defineConfig(
     languageOptions: {
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-  },
-  // This shared preset uses require/module.exports, so parse it as CommonJS
-  // even though ESLint otherwise treats .js files as ES modules by default.
-  {
-    files: ["**/eslint-config/index.js"],
-    languageOptions: { sourceType: "commonjs" },
   },
   // Keep this last to disable lint rules that conflict with Prettier formatting.
   // It does not run Prettier; formatting is handled by separate commands.

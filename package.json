@@ -7,8 +7,8 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "eslint .",
-    "check-types": "turbo run check-types",
-    "pretest": "node packages/vitest-config/scripts/clean-blob-reports.js",
+    "check-types": "tsc -p tsconfig.tools.json && turbo run check-types",
+    "pretest": "node packages/vitest-config/scripts/clean-blob-reports.ts",
     "test": "turbo run test",
     "test:projects": "vitest run",
     "test:projects:watch": "vitest --watch",
@@ -20,6 +20,11 @@
     "check": "pnpm lint && pnpm format:check && pnpm check-types && pnpm build && pnpm report"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@commitlint/types": "^21.2.3",
+    "@repo/eslint-config": "workspace:*",
+    "@types/node": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "eslint": "catalog:",
     "husky": "^9.1.7",
@@ -28,8 +33,7 @@
     "prettier": "^3.9.6",
     "turbo": "^2.10.12",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "@repo/eslint-config": "workspace:*"
+    "vitest": "catalog:"
   },
   "engines": {
     "node": ">=24.20.0"

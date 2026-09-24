@@ -15,6 +15,8 @@ import { Counter, Header } from "@repo/ui";
 
 The component-specific paths `@repo/ui/Counter` and `@repo/ui/Header` are also exported. All exports point directly to TypeScript source under `src`, which the consuming app processes; this package has no separate build step or compiled distribution.
 
+React and React DOM are peer dependencies so every consumer supplies a single shared copy; they are also dev dependencies for this package's own type checks and tests. Consumers should use the workspace catalog versions.
+
 ## Source and configuration
 
 `src/index.ts` is the package entry point. Components and their tests live in `src/components`, and `src/test-env.d.ts` supplies DOM matcher types. ESLint and Vitest configuration files stay at the package root.
