@@ -19,6 +19,6 @@ Extend the configuration that matches the code's runtime environment:
 }
 ```
 
-The apps and the UI package use a separate `tsconfig.node.json` extending `node.json` for their Vite and Vitest configuration files. These presets only configure type checking; Vite handles app output.
+The apps and the UI package keep `tsconfig.json` as a solution file whose `references` point at a source project (`tsconfig.app.json` or `tsconfig.lib.json`) extending `react.json` and a `tsconfig.node.json` extending `node.json` for their ESLint, Vite, and Vitest configuration files. The root `tsconfig.json` references `tsconfig.tools.json` the same way. Editors and typescript-eslint follow the references, so every file resolves to a project with the right settings. These presets only configure type checking; Vite handles app output.
 
 Vite-loaded configurations keep the bundler module resolution from `base.json`. The ESLint and Vitest tooling packages and the root `tsconfig.tools.json` also extend `node.json` but switch to NodeNext resolution because Node loads that code directly. Each package's `check-types` script is run by Turbo.

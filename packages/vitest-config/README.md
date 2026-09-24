@@ -41,7 +41,7 @@ The shared setup imports `@testing-library/jest-dom/vitest`, making DOM matchers
 
 Use `@testing-library/user-event` for user interactions. Create a fresh instance with `userEvent.setup()` inside each test before rendering, then await interactions such as `user.click(button)` and `user.type(input, "hello")`. The starter tests demonstrate this alongside DOM assertions. React Testing Library's `fireEvent` remains available for low-level events when needed.
 
-When adding a workspace, include `@testing-library/jest-dom` and `@testing-library/user-event` as development dependencies using the catalog, and add the matcher declaration file within its TypeScript include paths.
+When adding a workspace, include `@testing-library/jest-dom` and `@testing-library/user-event` as development dependencies using the catalog, and add the matcher declaration file within its TypeScript include paths. Also list that file as an `entry` for the workspace in the root `knip.json`: knip reads entries from `tsconfig.json`, and a solution-style `tsconfig.json` lists no files itself, so without the entry knip reports `@testing-library/jest-dom` as unused.
 
 ## Why merging is needed with Turborepo
 

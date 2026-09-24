@@ -21,7 +21,7 @@ React and React DOM are peer dependencies so every consumer supplies a single sh
 
 `src/index.ts` is the package entry point. Components and their tests live in `src/components`, and `src/test-env.d.ts` supplies DOM matcher types. ESLint and Vitest configuration files stay at the package root.
 
-`tsconfig.json` checks `src` using the shared React library preset. `tsconfig.node.json` checks `vitest.config.ts` with Node settings, matching the apps' separation of source and tooling. The `check-types` command runs both configurations.
+`tsconfig.json` is a solution file that only references two projects: `tsconfig.lib.json` checks `src` using the shared React library preset, and `tsconfig.node.json` checks `eslint.config.ts` and `vitest.config.ts` with Node settings, matching the apps' separation of source and tooling. Editors and the ESLint project service follow those references to find the right project for each file. The `check-types` command runs both projects.
 
 ## Common commands
 
