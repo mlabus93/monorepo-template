@@ -26,7 +26,8 @@
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "@repo/eslint-config": "workspace:*",
-    "eslint": "catalog:"
+    "eslint": "catalog:",
+    "jiti": "catalog:"
   },
   "peerDependencies": {
     "react": "^19.0.0",

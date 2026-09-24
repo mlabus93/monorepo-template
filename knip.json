@@ -1,0 +1,7 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    "apps/*": { "entry": ["src/test-env.d.ts"] },
+    "packages/ui": { "entry": ["src/test-env.d.ts"] }
+  }
+}
