@@ -31,7 +31,7 @@ Workspace runs discover untested JavaScript and TypeScript source under their ow
 
 Both configurations preserve Vitest's default exclusions and explicitly exclude type declarations, `*.test.*`/`*.spec.*` files, and `__tests__`, `__mocks__`, `test`, and `tests` directories. Configuration and tooling outside `src/` are outside this application coverage scope. Application `src/main.*` entry points, which only mount the app into the DOM, are also excluded. Re-export-only barrels remain in scope but contribute no executable statements.
 
-The aggregate baseline is 100% statements, lines, functions, and branches. These thresholds live in the root configuration used by `pnpm report` to merge coverage; individual workspace reports are informational. The merged report includes HTML, text, and `coverage-summary.json` output.
+The aggregate baseline is 80% statements, lines, and functions, and 75% branches. These thresholds live in the root configuration used by `pnpm report` to merge coverage; individual workspace reports are informational. The merged report includes HTML, text, and `coverage-summary.json` output.
 
 Native blob merging combines coverage maps already collected by workspace runs; root inclusion rules cannot recover files omitted from those blobs. Keep workspace collection and root scope aligned when changing these rules. After changing coverage collection, use root `pnpm report` to refresh the blobs and verify the report's source files and covered/total counts.
 
