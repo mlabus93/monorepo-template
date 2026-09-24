@@ -2,6 +2,21 @@ packages:
   - "apps/*"
   - "packages/*"
 
+# Install settings
+autoInstallPeers: true
+engineStrict: true
+
+# Supply-chain settings
+# Refuse package versions published less than 24 hours ago so a compromised
+# release can be yanked before it reaches this repository.
+minimumReleaseAge: 1440
+# Only packages listed here may run install/postinstall scripts. Add a
+# package here after reviewing why it needs a build step.
+onlyBuiltDependencies: []
+# Fail the install (instead of silently skipping) when a dependency has a
+# build script that is neither allowlisted above nor explicitly ignored.
+strictDepBuilds: true
+
 catalog:
   "@testing-library/jest-dom": ^7.0.1
   "@testing-library/react": ^16.3.0

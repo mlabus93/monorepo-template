@@ -25,6 +25,8 @@ jobs:
         include:
           - name: Lint
             script: lint
+          - name: Unused code
+            script: knip
           - name: Formatting
             script: format:check
           - name: Types
@@ -42,13 +44,23 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          # Test the minimum supported Node.js version from package.json.
-          node-version: "24.20.0"
+          # Pinned in .node-version; keep it equal to the engines floor in package.json.
+          node-version-file: .node-version
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Restore turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo/cache
+          # One cache per check so each job restores its own task results. The SHA
+          # makes every run save a fresh entry; the prefix falls back to the latest.
+          key: turbo-${{ runner.os }}-${{ matrix.script }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ matrix.script }}-
 
       - name: Run ${{ matrix.name }}
         run: pnpm run "$CHECK_SCRIPT"

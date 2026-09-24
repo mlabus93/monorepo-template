@@ -12,7 +12,8 @@
   },
   "scripts": {
     "report": "node scripts/merge-blob-reports.ts && vitest run --root ../.. --merge-reports coverage/merged-blob --passWithNoTests --coverage",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@testing-library/jest-dom": "catalog:",
@@ -23,7 +24,9 @@
     "@vitest/coverage-v8": "catalog:",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@repo/eslint-config": "workspace:*",
+    "eslint": "catalog:"
   },
   "peerDependencies": {
     "react": "^19.0.0",

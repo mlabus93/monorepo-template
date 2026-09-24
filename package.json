@@ -6,7 +6,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "eslint .",
+    "lint": "eslint . && turbo run lint",
+    "knip": "knip",
     "check-types": "tsc -p tsconfig.tools.json && turbo run check-types",
     "pretest": "node packages/vitest-config/scripts/clean-blob-reports.ts",
     "test": "turbo run test",
@@ -17,7 +18,7 @@
     "lint-staged": "lint-staged",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm lint && pnpm format:check && pnpm check-types && pnpm build && pnpm report"
+    "check": "pnpm lint && pnpm knip && pnpm format:check && pnpm check-types && pnpm build && pnpm report"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
@@ -29,6 +30,7 @@
     "eslint": "catalog:",
     "husky": "^9.1.7",
     "jsdom": "catalog:",
+    "knip": "^6.37.0",
     "lint-staged": "^17.5.1",
     "prettier": "^3.9.6",
     "turbo": "^2.10.12",
