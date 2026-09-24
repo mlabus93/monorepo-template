@@ -4,7 +4,7 @@ A reusable React, Vite, and Turborepo foundation for quickly starting new projec
 
 ## Getting started
 
-Clone this repository for your new project, then update the root package name, the copyright holder in `LICENSE`, and the owners in `.github/CODEOWNERS`, and replace the starter screens. Use Node.js 24.20.0 or newer and pnpm 12.1.0, as declared in `package.json`.
+Clone this repository for your new project, then update the root package name, the copyright holder in `LICENSE`, and the owners in `.github/CODEOWNERS`, and replace the starter screens. Use Node.js 24.20.0 or newer and pnpm 12.1.0, as declared in `package.json`; `.node-version` pins the exact version for version managers such as fnm, nvm, and Volta, and `engineStrict` in `pnpm-workspace.yaml` makes pnpm refuse to install on an unsupported Node.js. That file also holds the supply-chain settings: `minimumReleaseAge` delays newly published package versions for 24 hours, `onlyBuiltDependencies` is the allowlist of packages permitted to run install scripts (empty until a dependency needs one), and `strictDepBuilds` makes the install fail rather than silently skip a build script that is not on that list.
 
 ```sh
 pnpm install
@@ -29,12 +29,13 @@ Both apps currently display starter screens with a shared heading and counter. A
 Run these from the repository root:
 
 - `pnpm build`: type-check and build the apps into their respective `dist/` directories through Turbo.
-- `pnpm lint`: lint application code, workspace packages, and root configuration with ESLint. Each app and the UI package also supports a filtered `lint` command.
+- `pnpm lint`: lint root configuration with ESLint, then every workspace's own `lint` task through Turbo. The shared rules include type-aware TypeScript checks, React Hooks, accessibility checks for JSX, and a Fast Refresh check for component files; see [@repo/eslint-config](packages/eslint-config/README.md).
+- `pnpm knip`: report unused files, exports, dependencies, and scripts across all workspaces with [Knip](https://knip.dev). It runs without a configuration file; add a `knip.json` at the root only when a finding is a false positive that cannot be fixed at its source.
 - `pnpm check-types`: type-check root tooling with `tsconfig.tools.json`, then run each app and package's own `check-types` task through Turbo.
 - `pnpm lint-staged`: fix supported staged files with ESLint and Prettier.
 - `pnpm format`: format all supported source, configuration, and documentation files with Prettier, excluding generated output and the lockfile via `.prettierignore`.
 - `pnpm format:check`: check formatting without modifying files.
-- `pnpm check`: run lint, formatting checks, type checks, production builds, and tests with merged coverage, stopping at the first failure. This runs the same checks as CI.
+- `pnpm check`: run lint, Knip, formatting checks, type checks, production builds, and tests with merged coverage, stopping at the first failure. This runs the same checks as CI.
 
 Husky runs `pnpm lint-staged` before each commit, and [commitlint](commitlint.config.ts) checks that each commit message follows [Conventional Commits](https://www.conventionalcommits.org/) (for example, `fix: handle empty input`). Root and workspace lint-staged configurations fix staged JavaScript and TypeScript with ESLint and Prettier, and format other supported files with Prettier. Each staged file uses its nearest lint-staged configuration, and tasks run from that configuration's directory. Workspace tasks therefore do not automatically use the root `.prettierignore`. Generated directories such as `dist` and `coverage` are Git-ignored and are not normally staged. The root `pnpm format` and `pnpm format:check` commands use the root `.prettierignore`.
 
@@ -50,7 +51,7 @@ All workspace packages are private by default. Remove `private` and add an expli
 
 ## Continuous integration
 
-[GitHub Actions](.github/workflows/ci.yml) runs on every pull request, pushes to `main`, merge queue updates, and manual dispatches. Five independent checks verify lint, formatting, TypeScript, production builds, and tests with merged coverage. Installs use the frozen pnpm lockfile and the minimum supported Node.js version (24.20.0); update the workflow when changing the Node.js minimum in `package.json`. pnpm's version is read from `package.json`.
+[GitHub Actions](.github/workflows/ci.yml) runs on every pull request, pushes to `main`, merge queue updates, and manual dispatches. Six independent checks verify lint, unused code and dependencies, formatting, TypeScript, production builds, and tests with merged coverage. Installs use the frozen pnpm lockfile and the Node.js version pinned in `.node-version`; keep that file equal to the minimum in `package.json` so CI tests the oldest supported release. pnpm's version is read from `package.json`.
 
 The test job uploads a `coverage` artifact containing the HTML coverage report and workspace blob reports, retained for 14 days. Failed tests, or coverage below 80% of statements, lines, and functions or 75% of branches in any workspace or in the merged total, fail CI. Dependency downloads are cached, and newer commits cancel obsolete runs. Dependabot proposes weekly GitHub Actions updates.
 

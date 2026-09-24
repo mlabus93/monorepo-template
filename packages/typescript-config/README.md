@@ -4,24 +4,21 @@ This package contains the shared TypeScript compiler configurations used through
 
 ## Configurations
 
-- `base.json` supplies strict, no-emit, bundler-oriented defaults for any workspace.
-- `react-library.json` extends the base configuration with the React JSX transform and the same ES2023/browser library baseline as the Vite apps.
-- `vite.json` extends the base configuration with browser libraries, an ES2023 target, JSON module support, and additional unused-code and return checks for Vite apps.
+- `base.json` supplies strict, no-emit, bundler-oriented defaults for every workspace, including the unused-code and implicit-return checks. Strictness never varies by workspace: shared packages are consumed as source, so they are type-checked under their consumers' settings anyway.
+- `react.json` extends the base configuration with browser libraries, an ES2023 target, and the React JSX transform. Apps and React component packages use it.
+- `node.json` extends the base configuration with an ES2024 target and Node types for configuration files and tooling.
 
 ## Usage
 
-Extend the configuration that best matches the workspace:
+Extend the configuration that matches the code's runtime environment:
 
 ```json
 {
-  "extends": "@repo/typescript-config/vite.json",
-  "include": ["src"],
-  "compilerOptions": {
-    "jsx": "react-jsx"
-  }
+  "extends": "@repo/typescript-config/react.json",
+  "include": ["src"]
 }
 ```
 
-As in the apps, React consumers of `vite.json` must add the JSX setting locally. The apps use a separate `tsconfig.node.json` extending `base.json` for their Node-based Vite and Vitest configuration files. These presets only configure type checking; Vite handles app output.
+The apps and the UI package use a separate `tsconfig.node.json` extending `node.json` for their Vite and Vitest configuration files. These presets only configure type checking; Vite handles app output.
 
-Vite-loaded configurations keep bundler module resolution and use ES2024/Node types. The ESLint and Vitest tooling packages own their `tsconfig.json` files and use NodeNext resolution for code loaded directly by Node. The Vitest tooling package also includes DOM types for its React Testing Library setup. Root `tsconfig.tools.json` covers only root tooling. Each package's `check-types` script is run by Turbo.
+Vite-loaded configurations keep the bundler module resolution from `base.json`. The ESLint and Vitest tooling packages and the root `tsconfig.tools.json` also extend `node.json` but switch to NodeNext resolution because Node loads that code directly. Each package's `check-types` script is run by Turbo.
