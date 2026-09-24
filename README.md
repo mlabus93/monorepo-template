@@ -28,7 +28,7 @@ Both apps currently display starter screens with a shared heading and counter. A
 
 Run these from the repository root:
 
-- `pnpm build`: type-check and build the apps into their respective `dist/` directories through Turbo.
+- `pnpm build`: build the apps into their respective `dist/` directories through Turbo. Vite does not type-check, so run `pnpm check-types` or `pnpm check` for that.
 - `pnpm lint`: lint root configuration with ESLint, then every workspace's own `lint` task through Turbo. The shared rules include type-aware TypeScript checks, React Hooks, accessibility checks for JSX, and a Fast Refresh check for component files; see [@repo/eslint-config](packages/eslint-config/README.md).
 - `pnpm knip`: report unused files, exports, dependencies, and scripts across all workspaces with [Knip](https://knip.dev). It runs without a configuration file; add a `knip.json` at the root only when a finding is a false positive that cannot be fixed at its source.
 - `pnpm check-types`: type-check root tooling with `tsconfig.tools.json`, then run each app and package's own `check-types` task through Turbo.
@@ -51,7 +51,7 @@ All workspace packages are private by default. Remove `private` and add an expli
 
 ## Continuous integration
 
-[GitHub Actions](.github/workflows/ci.yml) runs on every pull request, pushes to `main`, merge queue updates, and manual dispatches. Six independent checks verify lint, unused code and dependencies, formatting, TypeScript, production builds, and tests with merged coverage. Installs use the frozen pnpm lockfile and the Node.js version pinned in `.node-version`; keep that file equal to the minimum in `package.json` so CI tests the oldest supported release. pnpm's version is read from `package.json`.
+[GitHub Actions](.github/workflows/ci.yml) runs on every pull request, pushes to `main`, merge queue updates, and manual dispatches. Six independent checks verify lint, unused code and dependencies, formatting, TypeScript, production builds, and tests with merged coverage. Installs use the frozen pnpm lockfile and the Node.js version pinned in `.node-version`; keep that file equal to the minimum in `package.json` so CI tests the oldest supported release. pnpm's version is read from `package.json`. Every action is pinned to a full commit SHA with its version in a trailing comment, so a moved tag cannot change what runs; [Dependabot](.github/dependabot.yml) keeps the SHAs and comments current.
 
 The test job uploads a `coverage` artifact containing the HTML coverage report and workspace blob reports, retained for 14 days. Failed tests, or coverage below 80% of statements, lines, and functions or 75% of branches in any workspace or in the merged total, fail CI. Dependency downloads are cached, and newer commits cancel obsolete runs. Dependabot proposes weekly GitHub Actions updates.
 
