@@ -3,15 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "types": "./index.d.ts",
+  "types": "./index.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "default": "./index.js"
+      "types": "./index.ts",
+      "default": "./index.ts"
     }
   },
   "scripts": {
-    "report": "node scripts/merge-blob-reports.js && vitest run --root ../.. --merge-reports coverage/merged-blob --passWithNoTests --coverage --coverage.provider=v8 --coverage.reporter=html --coverage.reporter=text --coverage.reportsDirectory=packages/vitest-config/coverage/report"
+    "report": "node scripts/merge-blob-reports.ts && vitest run --root ../.. --merge-reports coverage/merged-blob --passWithNoTests --coverage",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@testing-library/jest-dom": "catalog:",
@@ -19,7 +20,10 @@
     "vitest": "catalog:"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "catalog:"
+    "@vitest/coverage-v8": "catalog:",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
   },
   "peerDependencies": {
     "react": "^19.0.0",

@@ -30,7 +30,13 @@ for (const workspaceGroup of ["apps", "packages"]) {
     try {
       blobFiles = await readdir(blobDirectory, { withFileTypes: true });
     } catch (error) {
-      if (error?.code === "ENOENT") continue;
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        error.code === "ENOENT"
+      ) {
+        continue;
+      }
       throw error;
     }
 

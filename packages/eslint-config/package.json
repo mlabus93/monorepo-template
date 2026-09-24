@@ -1,7 +1,6 @@
 {
   "name": "@repo/eslint-config",
   "version": "0.0.0",
-  "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "@eslint/js": "^10.0.1",
@@ -14,5 +13,20 @@
   "peerDependencies": {
     "eslint": "^10.9.1"
   },
-  "private": true
+  "private": true,
+  "type": "module",
+  "types": "./index.ts",
+  "exports": {
+    ".": {
+      "types": "./index.ts",
+      "default": "./index.ts"
+    }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "catalog:"
+  }
 }
