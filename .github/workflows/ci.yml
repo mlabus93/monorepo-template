@@ -23,6 +23,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - name: Lockfile
+            script: dedupe:check
           - name: Lint
             script: lint
           - name: Unused code

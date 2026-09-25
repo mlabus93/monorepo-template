@@ -29,15 +29,16 @@ Both apps currently display starter screens with a shared heading and counter. A
 Run these from the repository root:
 
 - `pnpm build`: build the apps into their respective `dist/` directories through Turbo. Vite does not type-check, so run `pnpm check-types` or `pnpm check` for that.
-- `pnpm lint`: lint root configuration with ESLint, then every workspace's own `lint` task through Turbo. The shared rules include type-aware TypeScript checks, React Hooks, accessibility checks for JSX, and a Fast Refresh check for component files; see [@repo/eslint-config](packages/eslint-config/README.md).
+- `pnpm lint`: lint root configuration with ESLint, then every workspace's own `lint` task through Turbo. The shared rules include type-aware TypeScript checks, React Hooks, React's recommended JSX checks, accessibility checks for JSX, a Fast Refresh check for component files, and sorted imports; see [@repo/eslint-config](packages/eslint-config/README.md).
+- `pnpm dedupe:check`: fail if `pnpm dedupe` would change the lockfile, which catches duplicate package versions left behind as dependencies are added and upgraded. Run `pnpm dedupe` to fix it; the pre-commit hook does this automatically when the lockfile is staged.
 - `pnpm knip`: report unused files, exports, dependencies, and scripts across all workspaces with [Knip](https://knip.dev). It runs without a configuration file; add a `knip.json` at the root only when a finding is a false positive that cannot be fixed at its source.
 - `pnpm check-types`: type-check root tooling with `tsconfig.tools.json`, then run each app and package's own `check-types` task through Turbo.
 - `pnpm lint-staged`: fix supported staged files with ESLint and Prettier.
 - `pnpm format`: format all supported source, configuration, and documentation files with Prettier, excluding generated output and the lockfile via `.prettierignore`.
 - `pnpm format:check`: check formatting without modifying files.
-- `pnpm check`: run lint, Knip, formatting checks, type checks, production builds, and tests with merged coverage, stopping at the first failure. This runs the same checks as CI.
+- `pnpm check`: run the lockfile dedupe check, lint, Knip, formatting checks, type checks, production builds, and tests with merged coverage, stopping at the first failure. This runs the same checks as CI.
 
-Husky runs `pnpm lint-staged` before each commit, and [commitlint](commitlint.config.ts) checks that each commit message follows [Conventional Commits](https://www.conventionalcommits.org/) (for example, `fix: handle empty input`). Root and workspace lint-staged configurations fix staged JavaScript and TypeScript with ESLint and Prettier, and format other supported files with Prettier. Each staged file uses its nearest lint-staged configuration, and tasks run from that configuration's directory. Workspace tasks therefore do not automatically use the root `.prettierignore`. Generated directories such as `dist` and `coverage` are Git-ignored and are not normally staged. The root `pnpm format` and `pnpm format:check` commands use the root `.prettierignore`.
+Husky runs `pnpm lint-staged` before each commit, and [commitlint](commitlint.config.ts) checks that each commit message follows [Conventional Commits](https://www.conventionalcommits.org/) (for example, `fix: handle empty input`). Root and workspace lint-staged configurations fix staged JavaScript and TypeScript with ESLint and Prettier, and format other supported files with Prettier. When `pnpm-lock.yaml` is staged, the root configuration also runs `pnpm dedupe`, so duplicate package versions are removed before they reach CI's dedupe check. Each staged file uses its nearest lint-staged configuration, and tasks run from that configuration's directory. Workspace tasks therefore do not automatically use the root `.prettierignore`. Generated directories such as `dist` and `coverage` are Git-ignored and are not normally staged. The root `pnpm format` and `pnpm format:check` commands use the root `.prettierignore`.
 
 ## Environment variables
 
@@ -45,13 +46,13 @@ Keep app-specific environment files inside their app directory, such as `apps/we
 
 Vite exposes variables prefixed with `VITE_` to browser code, so these values must be safe to make public. Keep secrets in server-side systems. No environment file is required by the starter apps.
 
-The build task includes `.env*` files in its cache inputs and declares `VITE_*` variables in its `env` configuration, so changing either invalidates cached builds. Declare any additional environment variables that affect task output in the relevant task's `env` configuration in `turbo.json`.
+The build task includes `.env*` files in its cache inputs and declares `VITE_*` variables in its `env` configuration, so changing either invalidates cached builds. Declare any additional environment variables that affect task output in the relevant task's `env` configuration in `turbo.json`. `.node-version` and `pnpm-workspace.yaml` are listed in `globalDependencies`, so changing the Node.js version, the catalog, or workspace settings invalidates every cached task.
 
 All workspace packages are private by default. Remove `private` and add an explicit publishing setup only when a package is intended for distribution.
 
 ## Continuous integration
 
-[GitHub Actions](.github/workflows/ci.yml) runs on every pull request, pushes to `main`, merge queue updates, and manual dispatches. Six independent checks verify lint, unused code and dependencies, formatting, TypeScript, production builds, and tests with merged coverage. Installs use the frozen pnpm lockfile and the Node.js version pinned in `.node-version`; keep that file equal to the minimum in `package.json` so CI tests the oldest supported release. pnpm's version is read from `package.json`. Every action is pinned to a full commit SHA with its version in a trailing comment, so a moved tag cannot change what runs; [Dependabot](.github/dependabot.yml) keeps the SHAs and comments current.
+[GitHub Actions](.github/workflows/ci.yml) runs on every pull request, pushes to `main`, merge queue updates, and manual dispatches. Seven independent checks verify that the lockfile is deduplicated, lint, unused code and dependencies, formatting, TypeScript, production builds, and tests with merged coverage. Installs use the frozen pnpm lockfile and the Node.js version pinned in `.node-version`; keep that file equal to the minimum in `package.json` so CI tests the oldest supported release. pnpm's version is read from `package.json`. Every action is pinned to a full commit SHA with its version in a trailing comment, so a moved tag cannot change what runs; [Dependabot](.github/dependabot.yml) keeps the SHAs and comments current.
 
 The test job uploads a `coverage` artifact containing the HTML coverage report and workspace blob reports, retained for 14 days. Failed tests, or coverage below 80% of statements, lines, and functions or 75% of branches in any workspace or in the merged total, fail CI. Dependency downloads are cached, and newer commits cancel obsolete runs. Dependabot proposes weekly GitHub Actions updates.
 
