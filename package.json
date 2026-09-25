@@ -8,6 +8,7 @@
     "dev": "turbo run dev",
     "lint": "eslint . && turbo run lint",
     "knip": "knip",
+    "dedupe:check": "pnpm dedupe --check",
     "check-types": "tsc -p tsconfig.tools.json && turbo run check-types",
     "pretest": "node packages/vitest-config/scripts/clean-blob-reports.ts",
     "test": "turbo run test",
@@ -18,7 +19,7 @@
     "lint-staged": "lint-staged",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm lint && pnpm knip && pnpm format:check && pnpm check-types && pnpm build && pnpm report"
+    "check": "pnpm dedupe:check && pnpm lint && pnpm knip && pnpm format:check && pnpm check-types && pnpm build && pnpm report"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",

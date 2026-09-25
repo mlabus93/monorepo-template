@@ -1,10 +1,12 @@
 import eslint from "@eslint/js";
+import react from "@eslint-react/eslint-plugin";
 import { defineConfig } from "eslint/config";
 import eslintConfigPrettier from "eslint-config-prettier";
-import globals from "globals";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
+import globals from "globals";
 // TypeScript 7 has no compiler API yet, so this package aliases `typescript`
 // to `@typescript/typescript6` for typescript-eslint. Editors and builds use TS 7.
 import tseslint from "typescript-eslint";
@@ -85,6 +87,38 @@ export default function createConfig(tsconfigRootDir: string) {
       extends: [jsxA11y.flatConfigs.recommended, reactRefresh.configs.vite],
       languageOptions: {
         parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+    },
+    // Apply ESLint React's recommended checks for components, JSX, the DOM, and
+    // leaked browser resources, including its type-aware rules, so this section
+    // covers TypeScript files only. The preset also ships its own copies of the
+    // React Hooks rules; turn those off so each problem is reported once, by
+    // the React team's plugin above. Also require rel="noreferrer" on
+    // target="_blank" links, which the preset leaves to its strict variant.
+    {
+      files: ["**/*.{ts,tsx}"],
+      extends: [react.configs["recommended-type-checked"]],
+      rules: {
+        ...Object.fromEntries(
+          Object.keys(
+            react.configs["disable-conflict-eslint-plugin-react-hooks"].rules ??
+              {},
+          ).map((rule) => [
+            rule.replace("react-hooks/", "@eslint-react/"),
+            "off",
+          ]),
+        ),
+        "@eslint-react/dom-no-unsafe-target-blank": "error",
+      },
+    },
+    // Sort imports and re-exports so their order is deterministic. Both rules
+    // are autofixable, so `eslint --fix` and lint-staged reorder them.
+    {
+      files: ["**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}"],
+      plugins: { "simple-import-sort": simpleImportSort },
+      rules: {
+        "simple-import-sort/imports": "error",
+        "simple-import-sort/exports": "error",
       },
     },
     // Keep this last to disable lint rules that conflict with Prettier formatting.
