@@ -1,6 +1,6 @@
 # `@repo/playwright-config`
 
-This package provides shared [Playwright](https://playwright.dev) defaults for end-to-end tests. It contains configuration only; each app keeps its own specs in `e2e/` and its own `playwright.config.ts`, so Turbo caches and reruns every app's suite independently, as it does for unit tests.
+This package provides shared [Playwright](https://playwright.dev) defaults for end-to-end tests. It contains configuration only; each app keeps its own specs in `e2e/` and its own `playwright.config.ts`, so Turbo runs every app's suite as a separate task, as it does for unit tests.
 
 The configuration is `index.ts`, loaded as TypeScript by Playwright and checked by this package's `tsconfig.json` and `check-types` script. Root `pnpm check-types` runs that task through Turbo.
 
@@ -31,20 +31,18 @@ Vite serves `index.html` with status 200 for any unknown path, including a missi
 Set `PLAYWRIGHT_BASE_URL` to run a suite against an existing server, such as a preview deployment:
 
 ```sh
-PLAYWRIGHT_BASE_URL=https://staging.example.com pnpm turbo run test:e2e --filter web --force
+PLAYWRIGHT_BASE_URL=https://staging.example.com pnpm turbo run test:e2e --filter web
 ```
 
-When it is set, no local preview server starts, although Turbo still builds the app first. Every app reads the same variable, so filter to the app deployed at that URL; another app's suite would fail against it. The cache key includes the URL but not what it serves, so pass `--force` to test the deployment as it is now rather than replaying an earlier result for the same URL.
+When it is set, no local preview server starts, although Turbo still builds the app first. Every app reads the same variable, so filter to the app deployed at that URL; another app's suite would fail against it.
 
-## Caching with Turbo
+## Turbo tasks
 
-In [turbo.json](../../turbo.json), `test:e2e` declares `CI` and `PLAYWRIGHT_BASE_URL` in `env`, which puts them in the cache key and passes them through Turbo's strict environment mode. A run against a deployment never replays a local result, and a local run never replays a CI result. A second run against the same deployment URL can still replay the first, as described above. Any new variable the configuration reads must be declared the same way, or Turbo hides it from the task. `PLAYWRIGHT_BROWSERS_PATH` is passed through without affecting the key, since it only says where browsers are installed.
+In [turbo.json](../../turbo.json), `test:e2e` sets `"cache": false`, so every run executes the suite; only the `build` it depends on is cached. The `build` task excludes `e2e/` and `playwright.config.ts` from its inputs, so editing a spec does not rebuild the app. `test:e2e:ui` and `test:e2e:headed` are also uncached and depend on `build`. The UI task is persistent because the UI stays open.
 
-`playwright-report/**` and `test-results/**` are declared outputs, so a cache hit restores the HTML report and any traces along with the logs. The task keeps Turbo's default inputs, every Git-tracked file in the app, which already includes `e2e/` and the Playwright configuration. The `build` task excludes those two from its own inputs, and the Vitest `test` task also excludes `tsconfig.e2e.json`, so editing a spec reruns the suite without rebuilding the app or rerunning its unit tests.
+The tasks declare `CI` and `PLAYWRIGHT_BASE_URL` in `env` and `PLAYWRIGHT_BROWSERS_PATH` in `passThroughEnv`, which passes them through Turbo's strict environment mode. Any new variable the configuration reads must be declared the same way, or Turbo hides it from the task.
 
-Browser binaries, fonts, and the operating system are not part of the cache key. That is fine for behavioral assertions, but pixel screenshot comparisons would replay results produced on a different machine; mark such a task uncached or include the platform in its key before adding them. A retried pass is cached like any other, so a flaky test stays green until its inputs change. Fix flakiness rather than relying on retries, and set `"cache": false` on the task if it becomes a problem.
-
-`test:e2e:ui` and `test:e2e:headed` are uncached and also depend on `build`. The UI task is persistent because the UI stays open.
+Before caching `test:e2e`, note that browser binaries, fonts, the operating system, and what a deployment URL serves would not be part of the cache key, so screenshot comparisons and deployment runs could replay stale results, and a pass after retries would stay green until inputs change. Declare `playwright-report/**` and `test-results/**` as outputs so a cache hit restores the report and traces.
 
 ## Adding end-to-end tests to a workspace
 
@@ -53,6 +51,6 @@ Browser binaries, fonts, and the operating system are not part of the cache key.
 3. Add `test:e2e`, `test:e2e:ui`, and `test:e2e:headed` scripts following an existing app. The Turbo tasks already exist and apply to any workspace with those scripts.
 4. Add a `tsconfig.e2e.json` that extends `@repo/typescript-config/node.json`, adds the `DOM` library, and includes `e2e` and `playwright.config.ts`. Reference it from the workspace's solution `tsconfig.json` and add `tsc -p tsconfig.e2e.json --noEmit` to its `check-types` script. Type-aware ESLint rejects files that no project includes, so linting needs this too.
 5. Put specs in `e2e/`. The shared ESLint configuration applies Playwright's recommended rules and Node globals there, and the shared Vitest configuration excludes it, so no other configuration changes are needed.
-6. Run `pnpm test:e2e` twice and confirm the second run is a cache hit, then run `pnpm knip`. Knip's Playwright plugin reads each `playwright.config.ts` and treats the specs as entry files.
+6. Run `pnpm test:e2e`, then run `pnpm knip`. Knip's Playwright plugin reads each `playwright.config.ts` and treats the specs as entry files.
 
 CI runs root `pnpm test:e2e`, so a new workspace's suite joins the End-to-end check automatically.

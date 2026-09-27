@@ -1,6 +1,6 @@
 # `@repo/vitest-config`
 
-This package provides shared Vitest defaults and combines test and coverage results from independently cached Turborepo tasks. It contains configuration and report scripts, not a test suite of its own.
+This package provides shared Vitest defaults and combines test and coverage results from separate Turborepo tasks. It contains configuration and report scripts, not a test suite of its own.
 
 The configuration, setup, and report scripts use TypeScript and are checked by this package's `tsconfig.json` and `check-types` script. Root `pnpm check-types` runs that task through Turbo. The report scripts run directly with Node's built-in type stripping using the repository's required Node version.
 
@@ -45,9 +45,9 @@ When adding a workspace, include `@testing-library/jest-dom` and `@testing-libra
 
 ## Why merging is needed with Turborepo
 
-The root `pnpm test` command delegates to `turbo run test`. Each testable workspace runs its own Vitest process, which lets Turbo cache and restore results separately. For example, after a change isolated to `web`, Turbo can rerun its tests while reusing the `docs` and `ui` results, provided their inputs and dependencies are unchanged.
+The root `pnpm test` command delegates to `turbo run test`. Each testable workspace runs its own Vitest process as a separate Turbo task, so the suites run in parallel.
 
-Those processes produce separate reports. Turbo restores task output files and replays logs; it does not combine Vitest results or coverage. A single repository-wide coverage report therefore needs an aggregation step in this workflow. For test runs without caching or coverage, use `pnpm test:projects`.
+Those processes produce separate reports. Turbo does not combine Vitest results or coverage. A single repository-wide coverage report therefore needs an aggregation step in this workflow. For test runs without coverage, use `pnpm test:projects`.
 
 Each workspace's `test` script enables coverage and uses both the `default` and `blob` reporters:
 
@@ -57,14 +57,14 @@ vitest run --coverage --coverage.reporter=text --reporter=default --reporter=blo
 
 The default reporter displays test results, and the text coverage reporter displays local coverage. The native blob report stores the results and coverage data needed for later merging; it is not an HTML report or the ordinary JSON reporter's output. See [Vitest's blob reporter documentation](https://vitest.dev/guide/reporters.html#blob-reporter).
 
-In [turbo.json](../../turbo.json), `test.outputs` includes `coverage/blob/**`. That declaration makes the blob available on cache hits, when Vitest itself does not execute. Replaying terminal logs alone would not provide input for the merge. The `transit` dependency chain also propagates upstream workspace changes into test cache keys without requiring dependent test suites to run in sequence. `test` depends on its dependencies' `transit` tasks (`^transit`) rather than its own workspace's, whose default inputs cover every file in the workspace; its own files reach the cache key only through `test.inputs`, which leave out Playwright's `e2e/` specs and configuration so that editing them does not rerun Vitest.
+In [turbo.json](../../turbo.json), the `test` task sets `"cache": false`, so every run executes every suite. To cache it later, declare `coverage/blob/**` in `test.outputs` so a cache hit restores the blob for the merge, since replayed logs alone are not enough. The cache key must also change when an upstream workspace does, for example by depending on `^transit`, and should leave out Playwright's `e2e/` specs and configuration so that editing them does not rerun Vitest.
 
 ## What `pnpm report` does
 
 Run `pnpm report` from the repository root. It runs `pnpm test` first, then invokes this package's `report` command only if testing succeeds:
 
-1. **Clean old workspace blobs.** The root `pretest` hook runs [clean-blob-reports.ts](scripts/clean-blob-reports.ts). It removes `coverage/blob` from each directory immediately under `apps/` and `packages/`. This prevents a leftover report from a workspace that no longer produces one from entering the next aggregate. It does not remove Turbo's cache or existing HTML reports.
-2. **Run or restore tests.** Turbo executes tasks with cache misses and restores `coverage/blob/**` for cache hits. Both paths supply the same kind of report for the next step.
+1. **Clean old workspace blobs.** The root `pretest` hook runs [clean-blob-reports.ts](scripts/clean-blob-reports.ts). It removes `coverage/blob` from each directory immediately under `apps/` and `packages/`. This prevents a leftover report from a workspace that no longer produces one from entering the next aggregate. It does not remove existing HTML reports.
+2. **Run tests.** Turbo runs every workspace's suite, and each writes a blob to its own `coverage/blob/`.
 3. **Stage the blobs together.** [merge-blob-reports.ts](scripts/merge-blob-reports.ts) recreates this package's `coverage/merged-blob/` directory, scans workspace `coverage/blob/` directories, and copies their `.json` files into it. It prefixes filenames with the workspace group and directory name: `apps/web/coverage/blob/report.json` becomes `apps-web-report.json`. This prevents workspaces that all write `report.json` from overwriting one another. Missing blob directories are skipped; finding no reports at all is an error.
 4. **Merge with Vitest.** Despite its name, the staging script does not combine JSON or calculate coverage. The package's `report` command then invokes `vitest run --merge-reports`, which reads the staged native blobs and combines their test results and coverage without executing the tests again. The root configuration supplies the V8 provider, reporters, report directory, and aggregate thresholds.
 
@@ -76,13 +76,13 @@ The package command runs from `packages/vitest-config`: `--merge-reports coverag
 
 Run all commands below from the repository root:
 
-| Command                                    | Behavior                                                                                              |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `pnpm test`                                | Cleans old blobs, then runs or restores workspace tests through Turbo; prints per-workspace coverage. |
-| `pnpm report`                              | Runs the full cached test workflow, then builds the combined coverage report.                         |
-| `pnpm --filter @repo/vitest-config report` | Rebuilds the aggregate from existing blobs only; does not refresh workspace test results.             |
-| `pnpm test:projects`                       | Runs all registered projects directly in Vitest without Turbo caching or coverage.                    |
-| `pnpm test:projects:watch`                 | Watches all registered projects in one Vitest process without Turbo caching or coverage.              |
+| Command                                    | Behavior                                                                                  |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `pnpm test`                                | Cleans old blobs, then runs workspace tests through Turbo; prints per-workspace coverage. |
+| `pnpm report`                              | Runs the full test workflow, then builds the combined coverage report.                    |
+| `pnpm --filter @repo/vitest-config report` | Rebuilds the aggregate from existing blobs only; does not refresh workspace test results. |
+| `pnpm test:projects`                       | Runs all registered projects directly in Vitest without Turbo or coverage.                |
+| `pnpm test:projects:watch`                 | Watches all registered projects in one Vitest process without Turbo or coverage.          |
 
 Prefer root `pnpm report` when you need a complete, current report. The package-only command merges whatever blobs exist: it detects an empty set, but does not verify that every expected workspace contributed. Running just a filtered workspace's tests is not a replacement for the full refresh. Use matching Vitest versions across workspaces and the merge command; native blobs are version-specific.
 
@@ -91,7 +91,7 @@ Prefer root `pnpm report` when you need a complete, current report. The package-
 1. Add `@repo/vitest-config` as a workspace dependency and the test tooling needed by that workspace, following an existing app or UI package.
 2. Create `vitest.config.ts` using the shared configuration above and a unique project name.
 3. Add its configuration path to `test.projects` in the root `vitest.config.ts`.
-4. Add the `test` script shown above so Turbo has a task and a blob output to cache. Add a `test:watch` script if needed.
+4. Add the `test` script shown above so Turbo has a task to run and the report has a blob to merge. Add a `test:watch` script if needed.
 5. Keep application source under `src/`, or update both the shared and root coverage scopes for a different layout. Run root `pnpm report` and verify the new project's source appears in the report.
 
 The cleanup and staging scripts discover directories directly under `apps/` and `packages/`; they do not read pnpm's workspace patterns. Update both scripts if the repository adopts a different workspace layout.

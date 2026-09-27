@@ -67,24 +67,24 @@ To enforce these checks before merging, configure a branch ruleset or branch pro
 
 Tests use React Testing Library to render and query components, `@testing-library/user-event` for interactions, and `@testing-library/jest-dom` for DOM assertions. The shared Vitest setup registers matchers and cleans up rendered components between tests.
 
-- `pnpm test` runs the `web`, `docs`, and `ui` suites through Turborepo, reusing cached results when inputs are unchanged. Each workspace writes a blob report and prints coverage to the terminal.
+- `pnpm test` runs the `web`, `docs`, and `ui` suites through Turborepo. Each workspace writes a blob report and prints coverage to the terminal.
 - `pnpm test:projects` runs all suites once through the root Vitest Projects configuration.
 - `pnpm test:projects:watch` watches all projects in one Vitest process.
-- `pnpm report` runs or restores the workspace suites, then merges their native Vitest blob reports into one coverage report at `packages/vitest-config/coverage/report/index.html`.
+- `pnpm report` runs the workspace suites, then merges their native Vitest blob reports into one coverage report at `packages/vitest-config/coverage/report/index.html`.
 
-The `test:projects` commands run tests without Turbo caching or coverage. Use `pnpm report` for coverage.
+The `test:projects` commands run tests without Turbo or coverage. Use `pnpm report` for coverage.
 
 The coverage report includes application and shared-package source, including untested files. `src/main.*` entry points, which only mount the app, are excluded, as are declarations, tests, test support directories, and Vitest's default exclusions. Each workspace is measured only by its own tests, so shared components need tests in their package. HTML and `coverage-summary.json` reports are written to `packages/vitest-config/coverage/report/`.
 
-Each testable workspace's `vitest.config.ts` defines that test project; the root configuration references those files directly. See the [Vitest package overview](packages/vitest-config/README.md) for the caching and report-merging workflow and instructions for adding a test project.
+Each testable workspace's `vitest.config.ts` defines that test project; the root configuration references those files directly. See the [Vitest package overview](packages/vitest-config/README.md) for the report-merging workflow and instructions for adding a test project.
 
 ### End-to-end tests
 
 Each app keeps [Playwright](https://playwright.dev) specs in its own `e2e/` directory, with a `playwright.config.ts` built from [@repo/playwright-config](packages/playwright-config/README.md). The suites run against the production build: Turbo builds the app first, and Playwright starts `vite preview` on a fixed port, 4173 for `web` and 4174 for `docs`. Vitest skips `e2e/`, so unit runs and coverage are unaffected.
 
-- `pnpm test:e2e` runs both suites through Turbo, reusing cached results when neither the app, its dependencies, nor its specs changed.
+- `pnpm test:e2e` runs both suites through Turbo.
 - `pnpm turbo run test:e2e --filter web` runs one app's suite.
 - `pnpm turbo run test:e2e:ui --filter web` opens Playwright's UI mode for one app, and `test:e2e:headed` runs the suite in a visible browser.
-- `PLAYWRIGHT_BASE_URL=https://staging.example.com pnpm turbo run test:e2e --filter web --force` runs one app's suite against an existing deployment instead of a local preview. `--force` skips the cache, which cannot tell that the deployment changed.
+- `PLAYWRIGHT_BASE_URL=https://staging.example.com pnpm turbo run test:e2e --filter web` runs one app's suite against an existing deployment instead of a local preview.
 
-Firefox and WebKit are configured but opt-in. Install them with `pnpm --filter @repo/playwright-config exec playwright install firefox webkit`, then add their projects to a run, for example `pnpm turbo run test:e2e --filter web -- --project=firefox`, which runs Chromium and Firefox. Outside CI, Playwright reuses any server already listening on an app's port, so a `vite preview` you started by hand on 4173 is tested as is, even if it serves an older build; stop it before relying on the result. A cached pass is replayed until inputs change, so fix a flaky test rather than rerunning until it passes.
+Firefox and WebKit are configured but opt-in. Install them with `pnpm --filter @repo/playwright-config exec playwright install firefox webkit`, then add their projects to a run, for example `pnpm turbo run test:e2e --filter web -- --project=firefox`, which runs Chromium and Firefox. Outside CI, Playwright reuses any server already listening on an app's port, so a `vite preview` you started by hand on 4173 is tested as is, even if it serves an older build; stop it before relying on the result.

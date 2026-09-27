@@ -20,14 +20,7 @@
       "dependsOn": ["transit"]
     },
     "test": {
-      "dependsOn": ["^transit"],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        "!e2e/**",
-        "!playwright.config.ts",
-        "!tsconfig.e2e.json"
-      ],
-      "outputs": ["coverage/blob/**"]
+      "cache": false
     },
     "test:watch": {
       "cache": false,
@@ -37,7 +30,7 @@
       "dependsOn": ["build"],
       "env": ["CI", "PLAYWRIGHT_BASE_URL"],
       "passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"],
-      "outputs": ["playwright-report/**", "test-results/**"]
+      "cache": false
     },
     "test:e2e:ui": {
       "dependsOn": ["build"],
