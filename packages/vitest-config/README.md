@@ -57,7 +57,7 @@ vitest run --coverage --coverage.reporter=text --reporter=default --reporter=blo
 
 The default reporter displays test results, and the text coverage reporter displays local coverage. The native blob report stores the results and coverage data needed for later merging; it is not an HTML report or the ordinary JSON reporter's output. See [Vitest's blob reporter documentation](https://vitest.dev/guide/reporters.html#blob-reporter).
 
-In [turbo.json](../../turbo.json), `test.outputs` includes `coverage/blob/**`. That declaration makes the blob available on cache hits, when Vitest itself does not execute. Replaying terminal logs alone would not provide input for the merge. The `transit` dependency chain also propagates upstream workspace changes into test cache keys without requiring dependent test suites to run in sequence.
+In [turbo.json](../../turbo.json), `test.outputs` includes `coverage/blob/**`. That declaration makes the blob available on cache hits, when Vitest itself does not execute. Replaying terminal logs alone would not provide input for the merge. The `transit` dependency chain also propagates upstream workspace changes into test cache keys without requiring dependent test suites to run in sequence. `test` depends on its dependencies' `transit` tasks (`^transit`) rather than its own workspace's, whose default inputs cover every file in the workspace; its own files reach the cache key only through `test.inputs`, which leave out Playwright's `e2e/` specs and configuration so that editing them does not rerun Vitest.
 
 ## What `pnpm report` does
 
