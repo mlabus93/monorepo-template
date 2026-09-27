@@ -3,6 +3,7 @@ import react from "@eslint-react/eslint-plugin";
 import { defineConfig } from "eslint/config";
 import eslintConfigPrettier from "eslint-config-prettier";
 import jsxA11y from "eslint-plugin-jsx-a11y";
+import playwright from "eslint-plugin-playwright";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
@@ -25,6 +26,9 @@ export default function createConfig(tsconfigRootDir: string) {
         "**/dist/**",
         "**/dist-ssr/**",
         "**/coverage/**",
+        "**/playwright-report/**",
+        "**/test-results/**",
+        "**/blob-report/**",
         "**/.turbo/**",
         "**/.cache/**",
         "**/node_modules/**",
@@ -33,12 +37,14 @@ export default function createConfig(tsconfigRootDir: string) {
     // Start with ESLint's recommended checks for common JavaScript mistakes.
     eslint.configs.recommended,
     // Give tooling access to Node globals such as process, Buffer, and require.
+    // Playwright specs run in Node too and only reach the page through its API.
     // These local ignores only skip this section; browser code is still linted.
     {
       files: [
         "**/*.{js,mjs,cjs}",
         "**/*.config.{ts,mts,cts}",
         "**/scripts/**/*.{ts,mts,cts}",
+        "**/e2e/**/*.{ts,mts,cts}",
       ],
       ignores: ["**/src/**", "**/components/**"],
       languageOptions: {
@@ -110,6 +116,12 @@ export default function createConfig(tsconfigRootDir: string) {
         ),
         "@eslint-react/dom-no-unsafe-target-blank": "error",
       },
+    },
+    // Playwright's recommended checks for end-to-end specs, such as missing
+    // awaits, focused or skipped tests, and assertions that do not retry.
+    {
+      files: ["**/e2e/**/*.{ts,mts,cts}"],
+      extends: [playwright.configs["flat/recommended"]],
     },
     // Sort imports and re-exports so their order is deterministic. Both rules
     // are autofixable, so `eslint --fix` and lint-staged reorder them.

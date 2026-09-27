@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 
 import type { ViteUserConfig } from "vitest/config";
-import { coverageConfigDefaults } from "vitest/config";
+import { configDefaults, coverageConfigDefaults } from "vitest/config";
 
 export const sourceCoveragePattern = "src/**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}";
 
@@ -31,6 +31,8 @@ export const sharedProjectConfig = {
   test: {
     environment: "jsdom",
     restoreMocks: true,
+    // Playwright owns e2e/ specs; Vitest's default include would match them.
+    exclude: [...configDefaults.exclude, "**/e2e/**"],
     setupFiles: [fileURLToPath(new URL("./setup.ts", import.meta.url))],
     coverage: {
       provider: "v8",

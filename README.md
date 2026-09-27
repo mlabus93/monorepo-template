@@ -8,10 +8,13 @@ Clone this repository for your new project, then update the root package name, t
 
 ```sh
 pnpm install
+pnpm --filter @repo/playwright-config exec playwright install chromium
 pnpm dev
 ```
 
 `pnpm dev` starts both Vite apps; use the URLs printed in the terminal. To start only one app, run `pnpm --filter web dev` or `pnpm --filter docs dev`.
+
+The second command downloads the Chromium build used by the end-to-end tests, once per machine and again after a Playwright upgrade. Browsers live in a per-user cache outside the repository, and Playwright's own packages need no install script, so `onlyBuiltDependencies` stays empty. On Linux, add `--with-deps` to also install the system libraries Chromium needs.
 
 ## Apps and packages
 
@@ -21,6 +24,7 @@ pnpm dev
 - [@repo/eslint-config](packages/eslint-config/README.md): shared ESLint rules.
 - [@repo/typescript-config](packages/typescript-config/README.md): shared TypeScript compiler settings.
 - [@repo/vitest-config](packages/vitest-config/README.md): shared test defaults and scripts for combining coverage from Turbo tasks.
+- [@repo/playwright-config](packages/playwright-config/README.md): shared Playwright defaults for each app's end-to-end tests.
 
 Both apps currently display starter screens with a shared heading and counter. Application and component source is TypeScript; supporting configuration also uses JavaScript and JSON.
 
@@ -36,7 +40,8 @@ Run these from the repository root:
 - `pnpm lint-staged`: fix supported staged files with ESLint and Prettier.
 - `pnpm format`: format all supported source, configuration, and documentation files with Prettier, excluding generated output and the lockfile via `.prettierignore`.
 - `pnpm format:check`: check formatting without modifying files.
-- `pnpm check`: run the lockfile dedupe check, lint, Knip, formatting checks, type checks, production builds, and tests with merged coverage, stopping at the first failure. This runs the same checks as CI.
+- `pnpm test:e2e`: build each app and run its Playwright end-to-end tests in Chromium through Turbo; see [Testing](#testing).
+- `pnpm check`: run the lockfile dedupe check, lint, Knip, formatting checks, type checks, production builds, tests with merged coverage, and end-to-end tests, stopping at the first failure. This runs the same checks as CI, and needs the Chromium install from [Getting started](#getting-started).
 
 Husky runs `pnpm lint-staged` before each commit, and [commitlint](commitlint.config.ts) checks that each commit message follows [Conventional Commits](https://www.conventionalcommits.org/) (for example, `fix: handle empty input`). Root and workspace lint-staged configurations fix staged JavaScript and TypeScript with ESLint and Prettier, and format other supported files with Prettier. When `pnpm-lock.yaml` is staged, the root configuration also runs `pnpm dedupe`, so duplicate package versions are removed before they reach CI's dedupe check. Each staged file uses its nearest lint-staged configuration, and tasks run from that configuration's directory. Workspace tasks therefore do not automatically use the root `.prettierignore`. Generated directories such as `dist` and `coverage` are Git-ignored and are not normally staged. The root `pnpm format` and `pnpm format:check` commands use the root `.prettierignore`.
 
@@ -52,9 +57,9 @@ All workspace packages are private by default. Remove `private` and add an expli
 
 ## Continuous integration
 
-[GitHub Actions](.github/workflows/ci.yml) runs on every pull request, pushes to `main`, merge queue updates, and manual dispatches. Seven independent checks verify that the lockfile is deduplicated, lint, unused code and dependencies, formatting, TypeScript, production builds, and tests with merged coverage. Installs use the frozen pnpm lockfile and the Node.js version pinned in `.node-version`; keep that file equal to the minimum in `package.json` so CI tests the oldest supported release. pnpm's version is read from `package.json`. Every action is pinned to a full commit SHA with its version in a trailing comment, so a moved tag cannot change what runs; [Dependabot](.github/dependabot.yml) keeps the SHAs and comments current.
+[GitHub Actions](.github/workflows/ci.yml) runs on every pull request, pushes to `main`, merge queue updates, and manual dispatches. Eight independent checks verify that the lockfile is deduplicated, lint, unused code and dependencies, formatting, TypeScript, production builds, tests with merged coverage, and end-to-end tests. Installs use the frozen pnpm lockfile and the Node.js version pinned in `.node-version`; keep that file equal to the minimum in `package.json` so CI tests the oldest supported release. pnpm's version is read from `package.json`. Every action is pinned to a full commit SHA with its version in a trailing comment, so a moved tag cannot change what runs; [Dependabot](.github/dependabot.yml) keeps the SHAs and comments current.
 
-The test job uploads a `coverage` artifact containing the HTML coverage report and workspace blob reports, retained for 14 days. Failed tests, or coverage below 80% of statements, lines, and functions or 75% of branches in any workspace or in the merged total, fail CI. Dependency downloads are cached, and newer commits cancel obsolete runs. Dependabot proposes weekly GitHub Actions updates.
+The test job uploads a `coverage` artifact containing the HTML coverage report and workspace blob reports, retained for 14 days. Failed tests, or coverage below 80% of statements, lines, and functions or 75% of branches in any workspace or in the merged total, fail CI. The end-to-end job runs Chromium only, caches the browser download keyed on the Playwright version, and uploads a `playwright-report` artifact with each app's HTML report and traces when it fails, retained for 7 days. Dependency downloads are cached, and newer commits cancel obsolete runs. Dependabot proposes weekly GitHub Actions updates.
 
 To enforce these checks before merging, configure a branch ruleset or branch protection rule for `main` in GitHub repository settings: require pull requests, require the **CI passed** status check, and require branches to be up to date before merging (or use a merge queue). Run the workflow once so GitHub can offer the check in settings. `CI passed` fails if any check fails or is cancelled/skipped. The workflow alone does not prevent merging; the repository rule must be enabled separately. If your default branch has another name, update the workflow's push filter and protect that branch instead.
 
@@ -72,3 +77,14 @@ The `test:projects` commands run tests without Turbo caching or coverage. Use `p
 The coverage report includes application and shared-package source, including untested files. `src/main.*` entry points, which only mount the app, are excluded, as are declarations, tests, test support directories, and Vitest's default exclusions. Each workspace is measured only by its own tests, so shared components need tests in their package. HTML and `coverage-summary.json` reports are written to `packages/vitest-config/coverage/report/`.
 
 Each testable workspace's `vitest.config.ts` defines that test project; the root configuration references those files directly. See the [Vitest package overview](packages/vitest-config/README.md) for the caching and report-merging workflow and instructions for adding a test project.
+
+### End-to-end tests
+
+Each app keeps [Playwright](https://playwright.dev) specs in its own `e2e/` directory, with a `playwright.config.ts` built from [@repo/playwright-config](packages/playwright-config/README.md). The suites run against the production build: Turbo builds the app first, and Playwright starts `vite preview` on a fixed port, 4173 for `web` and 4174 for `docs`. Vitest skips `e2e/`, so unit runs and coverage are unaffected.
+
+- `pnpm test:e2e` runs both suites through Turbo, reusing cached results when neither the app, its dependencies, nor its specs changed.
+- `pnpm turbo run test:e2e --filter web` runs one app's suite.
+- `pnpm turbo run test:e2e:ui --filter web` opens Playwright's UI mode for one app, and `test:e2e:headed` runs the suite in a visible browser.
+- `PLAYWRIGHT_BASE_URL=https://staging.example.com pnpm turbo run test:e2e --filter web --force` runs one app's suite against an existing deployment instead of a local preview. `--force` skips the cache, which cannot tell that the deployment changed.
+
+Firefox and WebKit are configured but opt-in. Install them with `pnpm --filter @repo/playwright-config exec playwright install firefox webkit`, then add their projects to a run, for example `pnpm turbo run test:e2e --filter web -- --project=firefox`, which runs Chromium and Firefox. Outside CI, Playwright reuses any server already listening on an app's port, so a `vite preview` you started by hand on 4173 is tested as is, even if it serves an older build; stop it before relying on the result. A cached pass is replayed until inputs change, so fix a flaky test rather than rerunning until it passes.

@@ -4,7 +4,12 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*",
+        "!e2e/**",
+        "!playwright.config.ts"
+      ],
       "env": ["VITE_*"],
       "outputs": ["dist/**"]
     },
@@ -21,6 +26,25 @@
     "test:watch": {
       "cache": false,
       "persistent": true
+    },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "env": ["CI", "PLAYWRIGHT_BASE_URL"],
+      "passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"],
+      "outputs": ["playwright-report/**", "test-results/**"]
+    },
+    "test:e2e:ui": {
+      "dependsOn": ["build"],
+      "env": ["CI", "PLAYWRIGHT_BASE_URL"],
+      "passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"],
+      "cache": false,
+      "persistent": true
+    },
+    "test:e2e:headed": {
+      "dependsOn": ["build"],
+      "env": ["CI", "PLAYWRIGHT_BASE_URL"],
+      "passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"],
+      "cache": false
     },
     "transit": {
       "dependsOn": ["^transit"]

@@ -1,0 +1,8 @@
+{
+  "extends": "@repo/typescript-config/node.json",
+  "compilerOptions": {
+    // Callbacks passed to page.evaluate() run in the browser.
+    "lib": ["ES2024", "DOM"]
+  },
+  "include": ["e2e", "playwright.config.ts"]
+}

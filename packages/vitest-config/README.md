@@ -6,7 +6,7 @@ The configuration, setup, and report scripts use TypeScript and are checked by t
 
 ## Shared project configuration
 
-`sharedProjectConfig` sets `environment: "jsdom"` for DOM-based tests and `restoreMocks: true` to restore spied-on implementations before each test. Its shared [setup file](setup.ts) explicitly registers React Testing Library's `cleanup` with Vitest's `afterEach`, so components mounted with Testing Library are unmounted between tests without enabling Vitest globals. Roots created directly with React's `createRoot` still need their own teardown when reused within a test file.
+`sharedProjectConfig` sets `environment: "jsdom"` for DOM-based tests and `restoreMocks: true` to restore spied-on implementations before each test. It also adds `**/e2e/**` to Vitest's default exclusions, because Vitest would otherwise collect Playwright's `e2e/*.spec.ts` files; those belong to [@repo/playwright-config](../playwright-config/README.md). Workspace and root project runs both use this exclusion. Its shared [setup file](setup.ts) explicitly registers React Testing Library's `cleanup` with Vitest's `afterEach`, so components mounted with Testing Library are unmounted between tests without enabling Vitest globals. Roots created directly with React's `createRoot` still need their own teardown when reused within a test file.
 
 The setup file is resolved relative to this package, so it works in both workspace and root project runs. React and React DOM are peer dependencies; consumers should use the workspace catalog versions. When adding workspace-specific setup files, preserve the shared `setupFiles` entry. Each workspace imports these defaults and supplies a unique project name:
 
