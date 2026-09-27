@@ -34,7 +34,7 @@ Set `PLAYWRIGHT_BASE_URL` to run a suite against an existing server, such as a p
 PLAYWRIGHT_BASE_URL=https://staging.example.com pnpm turbo run test:e2e --filter web
 ```
 
-When it is set, no local preview server starts, although Turbo still builds the app first. Every app reads the same variable, so filter to the app deployed at that URL; another app's suite would fail against it.
+When it is set, no local preview server starts, although Turbo still builds the app first. An empty or blank value counts as unset, so an undefined CI secret falls back to the local preview instead of failing every navigation. Every app reads the same variable, so filter to the app deployed at that URL; another app's suite would fail against it.
 
 ## Turbo tasks
 

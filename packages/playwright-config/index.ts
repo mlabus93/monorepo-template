@@ -15,7 +15,9 @@ export function createPlaywrightConfig({
   const isCI = Boolean(process.env.CI);
   // Point the suite at an already running deployment instead of a local
   // preview. Turbo declares this variable in `env` so the task can read it.
-  const externalBaseURL = process.env.PLAYWRIGHT_BASE_URL;
+  // An empty or blank value, such as an unset CI secret, counts as unset so
+  // the preview server still starts instead of every navigation failing.
+  const externalBaseURL = process.env.PLAYWRIGHT_BASE_URL?.trim() || undefined;
   const baseURL = externalBaseURL ?? `http://localhost:${port}`;
 
   return defineConfig({

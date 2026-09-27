@@ -74,6 +74,12 @@ test("loads without console errors or failed requests", async ({ page }) => {
   await expect(
     page.getByRole("heading", { level: 1, name: appName }),
   ).toBeVisible();
+  // Effects and late requests can still report after first paint, so wait
+  // for the network to settle before reading the collected problems. The
+  // preview serves a static build with no long-lived connections, so the
+  // idle wait the lint rule warns about is reliable here.
+  // eslint-disable-next-line playwright/no-networkidle -- static preview page
+  await page.waitForLoadState("networkidle");
 
   expect(problems).toEqual([]);
 });
