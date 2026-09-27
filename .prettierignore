@@ -4,5 +4,8 @@
 **/coverage/
 **/.turbo/
 **/.cache/
+**/playwright-report/
+**/test-results/
+**/blob-report/
 pnpm-lock.yaml
 .env*

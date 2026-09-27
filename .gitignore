@@ -12,3 +12,6 @@ coverage
 .cache
 server/dist
 public/dist
+playwright-report
+test-results
+blob-report

@@ -6,7 +6,7 @@ The configuration, setup, and report scripts use TypeScript and are checked by t
 
 ## Shared project configuration
 
-`sharedProjectConfig` sets `environment: "jsdom"` for DOM-based tests and `restoreMocks: true` to restore spied-on implementations before each test. Its shared [setup file](setup.ts) explicitly registers React Testing Library's `cleanup` with Vitest's `afterEach`, so components mounted with Testing Library are unmounted between tests without enabling Vitest globals. Roots created directly with React's `createRoot` still need their own teardown when reused within a test file.
+`sharedProjectConfig` sets `environment: "jsdom"` for DOM-based tests and `restoreMocks: true` to restore spied-on implementations before each test. It also adds `**/e2e/**` to Vitest's default exclusions, because Vitest would otherwise collect Playwright's `e2e/*.spec.ts` files; those belong to [@repo/playwright-config](../playwright-config/README.md). Workspace and root project runs both use this exclusion. Its shared [setup file](setup.ts) explicitly registers React Testing Library's `cleanup` with Vitest's `afterEach`, so components mounted with Testing Library are unmounted between tests without enabling Vitest globals. Roots created directly with React's `createRoot` still need their own teardown when reused within a test file.
 
 The setup file is resolved relative to this package, so it works in both workspace and root project runs. React and React DOM are peer dependencies; consumers should use the workspace catalog versions. When adding workspace-specific setup files, preserve the shared `setupFiles` entry. Each workspace imports these defaults and supplies a unique project name:
 
@@ -57,7 +57,7 @@ vitest run --coverage --coverage.reporter=text --reporter=default --reporter=blo
 
 The default reporter displays test results, and the text coverage reporter displays local coverage. The native blob report stores the results and coverage data needed for later merging; it is not an HTML report or the ordinary JSON reporter's output. See [Vitest's blob reporter documentation](https://vitest.dev/guide/reporters.html#blob-reporter).
 
-In [turbo.json](../../turbo.json), `test.outputs` includes `coverage/blob/**`. That declaration makes the blob available on cache hits, when Vitest itself does not execute. Replaying terminal logs alone would not provide input for the merge. The `transit` dependency chain also propagates upstream workspace changes into test cache keys without requiring dependent test suites to run in sequence.
+In [turbo.json](../../turbo.json), `test.outputs` includes `coverage/blob/**`. That declaration makes the blob available on cache hits, when Vitest itself does not execute. Replaying terminal logs alone would not provide input for the merge. The `transit` dependency chain also propagates upstream workspace changes into test cache keys without requiring dependent test suites to run in sequence. `test` depends on its dependencies' `transit` tasks (`^transit`) rather than its own workspace's, whose default inputs cover every file in the workspace; its own files reach the cache key only through `test.inputs`, which leave out Playwright's `e2e/` specs and configuration so that editing them does not rerun Vitest. Editing `turbo.json` itself changes Turbo's global hash, so the first run after such a change misses every task.
 
 ## What `pnpm report` does
 

@@ -12,6 +12,7 @@
     "check-types": "tsc -p tsconfig.tools.json && turbo run check-types",
     "pretest": "node packages/vitest-config/scripts/clean-blob-reports.ts",
     "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
     "test:projects": "vitest run",
     "test:projects:watch": "vitest --watch",
     "report": "pnpm test && pnpm --filter @repo/vitest-config report",
@@ -19,7 +20,7 @@
     "lint-staged": "lint-staged",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm dedupe:check && pnpm lint && pnpm knip && pnpm format:check && pnpm check-types && pnpm build && pnpm report"
+    "check": "pnpm dedupe:check && pnpm lint && pnpm knip && pnpm format:check && pnpm check-types && pnpm build && pnpm report && pnpm test:e2e"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
