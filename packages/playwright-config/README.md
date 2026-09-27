@@ -1,6 +1,6 @@
 # `@repo/playwright-config`
 
-This package provides shared [Playwright](https://playwright.dev) defaults for end-to-end tests. It contains configuration only; each app keeps its own specs in `e2e/` and its own `playwright.config.ts`, so Turbo runs every app's suite as a separate task, as it does for unit tests.
+This package provides shared [Playwright](https://playwright.dev) defaults for end-to-end tests. It contains configuration only; each app keeps its own specs in `e2e/` and its own `playwright.config.ts`, so Turbo runs every app's suite as a separate task.
 
 The configuration is `index.ts`, loaded as TypeScript by Playwright and checked by this package's `tsconfig.json` and `check-types` script. Root `pnpm check-types` runs that task through Turbo.
 
@@ -38,7 +38,7 @@ When it is set, no local preview server starts, although Turbo still builds the 
 
 ## Turbo tasks
 
-In [turbo.json](../../turbo.json), `test:e2e` sets `"cache": false`, so every run executes the suite; only the `build` it depends on is cached. The `build` task excludes `e2e/` and `playwright.config.ts` from its inputs, so editing a spec does not rebuild the app. `test:e2e:ui` and `test:e2e:headed` are also uncached and depend on `build`. The UI task is persistent because the UI stays open.
+In [turbo.json](../../turbo.json), `test:e2e` sets `"cache": false`, so every run executes the suite; only the `build` it depends on is cached. The `build` task excludes `e2e/` and `playwright.config.ts` from its inputs, and the Vitest `test` task also excludes `tsconfig.e2e.json`, so editing a spec reruns the suite without rebuilding the app or rerunning its unit tests. `test:e2e:ui` and `test:e2e:headed` are also uncached and depend on `build`. The UI task is persistent because the UI stays open.
 
 The tasks declare `CI` and `PLAYWRIGHT_BASE_URL` in `env` and `PLAYWRIGHT_BROWSERS_PATH` in `passThroughEnv`, which passes them through Turbo's strict environment mode. Any new variable the configuration reads must be declared the same way, or Turbo hides it from the task.
 

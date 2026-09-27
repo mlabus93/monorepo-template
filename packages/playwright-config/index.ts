@@ -14,7 +14,7 @@ export function createPlaywrightConfig({
 }: PlaywrightConfigOptions): PlaywrightTestConfig {
   const isCI = Boolean(process.env.CI);
   // Point the suite at an already running deployment instead of a local
-  // preview. Turbo hashes this variable, so each target caches separately.
+  // preview. Turbo declares this variable in `env` so the task can read it.
   const externalBaseURL = process.env.PLAYWRIGHT_BASE_URL;
   const baseURL = externalBaseURL ?? `http://localhost:${port}`;
 
@@ -23,8 +23,8 @@ export function createPlaywrightConfig({
     fullyParallel: true,
     // Fail CI if a focused test.only slipped into a commit.
     forbidOnly: isCI,
-    // Retries absorb one-off flakes in CI; a retried pass is still cached by
-    // Turbo, so treat a flaky test as a bug rather than relying on this.
+    // Retries absorb one-off flakes in CI, but a pass on retry hides the
+    // flake, so treat a flaky test as a bug rather than relying on this.
     retries: isCI ? 2 : 0,
     reporter: isCI
       ? [["html", { open: "never", title: `${name} end-to-end` }], ["github"]]

@@ -67,22 +67,22 @@ To enforce these checks before merging, configure a branch ruleset or branch pro
 
 Tests use React Testing Library to render and query components, `@testing-library/user-event` for interactions, and `@testing-library/jest-dom` for DOM assertions. The shared Vitest setup registers matchers and cleans up rendered components between tests.
 
-- `pnpm test` runs the `web`, `docs`, and `ui` suites through Turborepo. Each workspace writes a blob report and prints coverage to the terminal.
+- `pnpm test` runs the `web`, `docs`, and `ui` suites through Turborepo, reusing cached results when inputs are unchanged. Each workspace writes a blob report and prints coverage to the terminal.
 - `pnpm test:projects` runs all suites once through the root Vitest Projects configuration.
 - `pnpm test:projects:watch` watches all projects in one Vitest process.
-- `pnpm report` runs the workspace suites, then merges their native Vitest blob reports into one coverage report at `packages/vitest-config/coverage/report/index.html`.
+- `pnpm report` runs or restores the workspace suites, then merges their native Vitest blob reports into one coverage report at `packages/vitest-config/coverage/report/index.html`.
 
-The `test:projects` commands run tests without Turbo or coverage. Use `pnpm report` for coverage.
+The `test:projects` commands run tests without Turbo caching or coverage. Use `pnpm report` for coverage.
 
 The coverage report includes application and shared-package source, including untested files. `src/main.*` entry points, which only mount the app, are excluded, as are declarations, tests, test support directories, and Vitest's default exclusions. Each workspace is measured only by its own tests, so shared components need tests in their package. HTML and `coverage-summary.json` reports are written to `packages/vitest-config/coverage/report/`.
 
-Each testable workspace's `vitest.config.ts` defines that test project; the root configuration references those files directly. See the [Vitest package overview](packages/vitest-config/README.md) for the report-merging workflow and instructions for adding a test project.
+Each testable workspace's `vitest.config.ts` defines that test project; the root configuration references those files directly. See the [Vitest package overview](packages/vitest-config/README.md) for the caching and report-merging workflow and instructions for adding a test project.
 
 ### End-to-end tests
 
-Each app keeps [Playwright](https://playwright.dev) specs in its own `e2e/` directory, with a `playwright.config.ts` built from [@repo/playwright-config](packages/playwright-config/README.md). The suites run against the production build: Turbo builds the app first, and Playwright starts `vite preview` on a fixed port, 4173 for `web` and 4174 for `docs`. Vitest skips `e2e/`, so unit runs and coverage are unaffected.
+Each app keeps [Playwright](https://playwright.dev) specs in its own `e2e/` directory, with a `playwright.config.ts` built from [@repo/playwright-config](packages/playwright-config/README.md). The suites run against the production build: Turbo builds the app first, and Playwright starts `vite preview` on a fixed port, 4173 for `web` and 4174 for `docs`. Vitest skips `e2e/`, and the Turbo `test` task leaves the specs and Playwright configuration out of its cache key, so editing them neither reruns unit tests nor affects coverage.
 
-- `pnpm test:e2e` runs both suites through Turbo.
+- `pnpm test:e2e` runs both suites through Turbo. The task is uncached, so every run executes the suites.
 - `pnpm turbo run test:e2e --filter web` runs one app's suite.
 - `pnpm turbo run test:e2e:ui --filter web` opens Playwright's UI mode for one app, and `test:e2e:headed` runs the suite in a visible browser.
 - `PLAYWRIGHT_BASE_URL=https://staging.example.com pnpm turbo run test:e2e --filter web` runs one app's suite against an existing deployment instead of a local preview.

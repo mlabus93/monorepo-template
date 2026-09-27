@@ -20,7 +20,14 @@
       "dependsOn": ["transit"]
     },
     "test": {
-      "cache": false
+      "dependsOn": ["^transit"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!e2e/**",
+        "!playwright.config.ts",
+        "!tsconfig.e2e.json"
+      ],
+      "outputs": ["coverage/blob/**"]
     },
     "test:watch": {
       "cache": false,
